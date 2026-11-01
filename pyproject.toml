@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nibs-lattice"
+version = "0.1.0"
+description = "Lattice routines for non-interactive blind signatures"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{name = "Jiaqi Cheng"}]
+dependencies = []
+
+[tool.setuptools]
+packages = ["nibs"]
