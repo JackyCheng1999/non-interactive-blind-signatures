@@ -1,0 +1,113 @@
+diff --git a/config.h b/config.h
+index 3759aab..d88d11e 100644
+--- a/config.h
++++ b/config.h
+@@ -2,7 +2,7 @@
+  * TARGET: GENERIC, AMD64
+  * Architecture target.
+  */
+-#define TARGET TARGET_AMD64
++#define TARGET TARGET_GENERIC
+ 
+ /*
+  * RNG: SHAKE128, AES256CTR
+diff --git a/python/lazer_cffi_build.py b/python/lazer_cffi_build.py
+index 0bd8930..45c41f5 100644
+--- a/python/lazer_cffi_build.py
++++ b/python/lazer_cffi_build.py
+@@ -396,7 +396,7 @@ includedirs = [prefix]
+ # XXX get hexl path from build system
+ libdirs = [prefix, f"{prefix}/third_party/hexl-development/build/hexl/lib/", f"{prefix}/third_party/hexl-development/build/hexl/lib64/"]
+ runtimelibdirs = [prefix, f"{prefix}/third_party/hexl-development/build/hexl/lib/", f"{prefix}/third_party/hexl-development/build/hexl/lib64/"]
+-libs_lazer = ['lazer', 'hexl', 'mpfr', 'gmp', 'm', 'stdc++']
++libs_lazer = ['lazer', 'hexl', 'mpfr', 'gmp', 'm', 'c++' if sys.platform == 'darwin' else 'stdc++']
+ source_lazer = """
+ #include "lazer.h"
+ """
+diff --git a/src/lazer-in2.h b/src/lazer-in2.h
+index e15728a..951e9fa 100644
+--- a/src/lazer-in2.h
++++ b/src/lazer-in2.h
+@@ -2005,7 +2005,7 @@ _get_coeffvec (poly_t poly)
+   return poly->coeffs;
+ }
+ 
+-#ifndef _OS_IOS
++#if TARGET == TARGET_AMD64
+ #include <immintrin.h>
+ #include <x86intrin.h>
+ #endif
+@@ -2046,7 +2046,7 @@ static inline unsigned char
+ _addcarry_u64_ (unsigned char c, unsigned long long x, unsigned long long y,
+                 unsigned long long *p)
+ {
+-#ifdef _OS_IOS
++#if defined(_OS_IOS) || defined(__aarch64__)
+   unsigned long long cout;
+ 
+   *p = __builtin_addcll (x, y, c, &cout);
+@@ -2060,7 +2060,7 @@ static inline unsigned char
+ _subborrow_u64_ (unsigned char c, unsigned long long x, unsigned long long y,
+                  unsigned long long *p)
+ {
+-#ifdef _OS_IOS
++#if defined(_OS_IOS) || defined(__aarch64__)
+   unsigned long long cout;
+ 
+   *p = __builtin_subcll (x, y, c, &cout);
+--- a/third_party/hexl-development/hexl/util/cpu-features.hpp
++++ b/third_party/hexl-development/hexl/util/cpu-features.hpp
+@@ -7,7 +7,9 @@
+ 
+ #include <cstdlib>
+ 
++#if defined(__x86_64__) || defined(_M_X64)
+ #include "cpuinfo_x86.h"  // NOLINT(build/include_subdir)
++#endif
+ 
+ namespace intel {
+ namespace hexl {
+@@ -20,6 +22,7 @@
+ static const bool disable_avx512vbmi2 =
+     disable_avx512dq || (std::getenv("HEXL_DISABLE_AVX512VBMI2") != nullptr);
+ 
++#if defined(__x86_64__) || defined(_M_X64)
+ static const cpu_features::X86Features features =
+     cpu_features::GetX86Info().features;
+ 
+@@ -30,6 +33,11 @@
+ 
+ static const bool has_avx512vbmi2 =
+     features.avx512vbmi2 && !disable_avx512vbmi2;
++#else
++static const bool has_avx512dq = false;
++static const bool has_avx512ifma = false;
++static const bool has_avx512vbmi2 = false;
++#endif
+ 
+ }  // namespace hexl
+ }  // namespace intel
+--- a/third_party/hexl-development/hexl/util/avx512-util.hpp
++++ b/third_party/hexl-development/hexl/util/avx512-util.hpp
+@@ -3,7 +3,9 @@
+ 
+ #pragma once
+ 
++#if defined(__x86_64__) || defined(_M_X64)
+ #include <immintrin.h>
++#endif
+ 
+ #include <vector>
+ 
+--- a/third_party/hexl-development/hexl/eltwise/eltwise-cmp-sub-mod-avx512.hpp
++++ b/third_party/hexl-development/hexl/eltwise/eltwise-cmp-sub-mod-avx512.hpp
+@@ -3,7 +3,9 @@
+ 
+ #pragma once
+ 
++#if defined(__x86_64__) || defined(_M_X64)
+ #include <immintrin.h>
++#endif
+ #include <stdint.h>
+ 
+ #include "eltwise/eltwise-cmp-sub-mod-internal.hpp"

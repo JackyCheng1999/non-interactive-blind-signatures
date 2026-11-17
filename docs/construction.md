@@ -2,7 +2,7 @@
 
 This code follows the algebra in Section 7.1 of
 [Non-interactive Blind Signatures: Post-quantum and Stronger Security](https://eprint.iacr.org/2024/614.pdf),
-ePrint pages 44–45. The Bonsai sampling step is described on page 18.
+ePrint pages 44–45. The Bonsai sampling step is described on page 19.
 
 The public matrices are $A,B,C\in\mathbb Z_q^{n\times 2m}$, with
 $A=[A_L\mid A_R]$ and $C=[C_L\mid C_R]$. Vectors keep their signed integer
@@ -79,11 +79,15 @@ oracle; it does not prove that model's security claims.
 The default $n=2$, $m=8$, $q=17$, $s=8$ keeps the example small. These are
 toy parameters and do not meet the paper's security requirements.
 
-## Remaining signature layer
+## Signature layer
 
 The full construction encrypts the witness $(x,y,z)$ and proves membership
 in language $L_2$. Its signature is $\sigma=(\pi,ct)$, and public
-verification checks that proof. Encryption and the NIZK are still to be
-implemented. A successful relation check in this repository establishes
-the displayed equations only; it is not final signature verification or
-a demonstration of blindness or one-more unforgeability.
+verification checks that proof. The implementation now includes a small Regev
+encryption instance and a LaZer/LNP22 proof of the full relation; see
+[the NIZK notes](nizk.md) for the encoding and build instructions.
+
+The original `nibs.demo` checks the equations only. `nibs.nizk_demo` additionally
+generates and publicly verifies the actual proof. Both use toy NIBS parameters
+and public rejection sampling for issuance, so they do not establish blindness
+or one-more unforgeability for this implementation.

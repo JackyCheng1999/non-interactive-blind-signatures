@@ -4,12 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nibs-lattice"
-version = "0.1.0"
+version = "0.2.0"
 description = "Lattice routines for non-interactive blind signatures"
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [{name = "Jiaqi Cheng"}]
 dependencies = []
+
+[project.optional-dependencies]
+lazer = ["cffi==2.0.0"]
 
 [tool.setuptools]
 packages = ["nibs"]

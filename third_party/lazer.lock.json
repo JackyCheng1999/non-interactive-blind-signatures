@@ -1,0 +1,17 @@
+{
+  "repository": "https://github.com/lazer-crypto/lazer.git",
+  "commit": "10eafeca4cd53ff4fc54193dce904dbd0026fefd",
+  "scope": "LNP linear relations with L2 bounds; excludes LaBRADOR",
+  "bundled_archives": {
+    "hexl-development.zip": "40dbed4d163c4c668807daf1ac733429308ed351b482d72346498591b0bf8fce",
+    "Falcon-impl-20211101.zip": "d9f982bd825b9903b57b686d6d26018dac173a1dff09f224cc39302f9d85a595"
+  },
+  "python_build_dependencies": {
+    "cffi": "2.0.0",
+    "pycparser": "2.23",
+    "setuptools": "80.9.0"
+  },
+  "arm64_patch": "lazer-arm64.patch",
+  "arm64_patch_sha256": "f7ea8a5d25baf65f30a35090b00d204cd25b94f1b762f0f04f967819b3372349",
+  "parameter_generation": "SageMath >= 10.2; not needed for existing generated headers"
+}
