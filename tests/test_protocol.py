@@ -41,6 +41,21 @@ class ProtocolTests(unittest.TestCase):
         self.receiver = ReceiverSecret((1, 2, -1, 1), b"\x00")
         self.presignature = Presignature((2, -1, 3, 1), (1, -1, 1, -1))
 
+    def test_public_parameters_copy_input_matrices(self):
+        A = [list(row) for row in self.pp.A]
+        B = [list(row) for row in self.pp.B]
+        pp = PublicParameters(self.params, A, B)
+
+        A[0][0] = 9
+        B[0][1] = 5
+        A.append([0, 0, 0, 0])
+        B[0] = [0, 0, 0, 0]
+
+        self.assertEqual(pp, self.pp)
+        self.assertTrue(check_presignature(pp, self.C, self.receiver, self.presignature))
+        with self.assertRaises(TypeError):
+            pp.A[0][0] = 9
+
     def assert_rejected(self, C, receiver, presignature):
         self.assertFalse(check_presignature(self.pp, C, receiver, presignature))
         with self.assertRaises(ValueError):

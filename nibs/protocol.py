@@ -48,6 +48,8 @@ class PublicParameters:
     def __post_init__(self):
         _check_matrix(self.A, self.params)
         _check_matrix(self.B, self.params)
+        object.__setattr__(self, "A", tuple(tuple(row) for row in self.A))
+        object.__setattr__(self, "B", tuple(tuple(row) for row in self.B))
 
 
 @dataclass(frozen=True)
