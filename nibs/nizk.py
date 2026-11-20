@@ -42,9 +42,12 @@ def _load_native():
     return lazer, pointer
 
 
-def _check_profile(statement, system):
+def _check_supported_parameters(statement):
     if statement.pp.params != Parameters() or statement.encryption_key.params != Params():
         raise ValueError("this proof profile supports the default demo parameters only")
+
+
+def _check_profile(system):
     if (
         system.modulus != 1_114_129
         or len(system.matrix) != 244
@@ -79,8 +82,9 @@ class LazerNIZK:
         return shake_256(domain + self.crs_seed + statement_bytes(statement)).digest(32)
 
     def prove(self, statement: Statement, witness: Witness) -> bytes:
+        _check_supported_parameters(statement)
         system = encode_statement(statement)
-        _check_profile(statement, system)
+        _check_profile(system)
         vector = encode_witness(statement, witness)
         if not check_witness(system, vector):
             raise ValueError("witness does not satisfy the full L2 relation")
@@ -101,15 +105,16 @@ class LazerNIZK:
         if not isinstance(proof, bytes) or not 32 <= len(proof) <= MAX_PROOF_BYTES:
             return False
         try:
+            _check_supported_parameters(statement)
             system = encode_statement(statement)
-            _check_profile(statement, system)
+            _check_profile(system)
+            payload = {
+                "crs_seed": self.crs_seed.hex(),
+                "statement": json.loads(statement_bytes(statement)),
+                "proof": base64.b64encode(proof).decode("ascii"),
+            }
         except (ValueError, TypeError, AttributeError):
             return False
-        payload = {
-            "crs_seed": self.crs_seed.hex(),
-            "statement": json.loads(statement_bytes(statement)),
-            "proof": base64.b64encode(proof).decode("ascii"),
-        }
         # The upstream decoder has no input-length argument. Keep malformed
         # native input in a separate process, and reject crashes and timeouts.
         env = os.environ.copy()
@@ -130,8 +135,9 @@ class LazerNIZK:
         return result.returncode == 0 and result.stdout.strip() == "accept"
 
     def _verify_native(self, statement, proof):
+        _check_supported_parameters(statement)
         system = encode_statement(statement)
-        _check_profile(statement, system)
+        _check_profile(system)
         lazer, params = _load_native()
         _, matrix, target = _native_statement(lazer, system)
         verifier = lazer.lin_verifier_state_t(self._seed(statement), params)
